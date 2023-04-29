@@ -408,24 +408,68 @@ GameNode *sort_games_by_rating(GameNode *head){
 
 
 int main(){
-
 GameNode *gn;
 GameLinkedList *gll; 
 gll = (GameLinkedList*)malloc(sizeof(GameLinkedList));
 
 gn = NULL;
 gll->head = gn;
-gll->head = insert_game_at_end(gll->head);
-insert_game_at_end(gll->head);
-insert_game_at_end(gll->head);
-//gll->head = delete_game_by_title(gll->head);
-insert_dlc_at_end(gll->head);
-insert_dlc_at_end(gll->head);
 
 
-sort_games_by_rating(gll->head);
-printList(gll->head);
-printDLC(gll->head);
+while(1){
+    int operation;
+    printf("Video Game List Operations\n");
+    printf("-----------------------------\n");
+    printf("1. Insert game\n");
+    printf("2. Delete game\n");
+    printf("3. Print all games\n");
+    printf("4. Sort games by rating\n");
+    printf("5. Insert DLC for a game\n");
+    printf("6. Delete DLC for a game\n");
+    printf("7. print DLC for a game\n");
+    printf("8. Exit\n");
+    scanf("%d", &operation);
+    getchar();
+    switch(operation){
+        case 1:
+
+            gll->head = insert_game_at_end(gll->head);
+            break;
+        case 2:
+            gll->head = delete_game_by_title(gll->head);
+            break;
+        case 3:
+            printList(gll->head);
+            break;
+        case 4:
+            sort_games_by_rating(gll->head);
+            break;
+        case 5:
+            insert_dlc_at_end(gll->head);
+            break;
+        case 6:
+            gll->head->dlc_head = delete_dlc_by_title(gll->head);
+            break;
+        case 7:
+            printDLC(gll->head);
+            break;
+        case 8:
+            return 0;
+            //free()
+            break;
+        
+        default:
+            printf("Error! There is no such operation\n");
+            break;
+    }
+    }
+
+
+
+
+
+
+
 
     return 0;
 }
