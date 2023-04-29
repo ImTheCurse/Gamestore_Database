@@ -349,6 +349,64 @@ DLCNode *delete_dlc_by_title(GameNode *head){
 
 
 
+void swapNodes(GameNode *a, GameNode *b){
+    int yearTemp = 0;
+    float floatTemp = 0;
+    char *tempPtr;
+    DLCNode *DNNodePtr;
+    //Swaping the values of rating and year.
+    yearTemp = a->year;
+    a->year = b->year;
+    b->year = yearTemp;
+
+    floatTemp = a->rating;
+    a->rating = b->rating;
+    b->rating = floatTemp;
+    
+    //Swaping the pointers of genre and title.
+    tempPtr = a->title;
+    a->title = b->title;
+    b->title = tempPtr;
+
+    tempPtr = a->genre;
+    a->genre = b->genre;
+    b->genre = tempPtr;
+    
+
+
+
+    //Swaping the DLC nodes pointers.
+    
+    DNNodePtr = a->dlc_head;
+    a->dlc_head = b->dlc_head;
+    b->dlc_head = DNNodePtr;
+}
+
+
+GameNode *sort_games_by_rating(GameNode *head){
+
+    GameNode *curr = head;
+    GameNode *prev = head;
+    GameNode *flag = head;
+    
+    while(flag != NULL){
+        while(curr != NULL){
+            if(curr->rating > prev->rating){
+                swapNodes(curr,prev);
+            }
+            prev = curr;
+            curr = curr->next;
+        }
+        flag = flag->next;
+        prev = head;
+        curr = head;
+    }
+
+    return head;
+}
+
+
+
 int main(){
 
 GameNode *gn;
@@ -359,13 +417,15 @@ gn = NULL;
 gll->head = gn;
 gll->head = insert_game_at_end(gll->head);
 insert_game_at_end(gll->head);
-insert_dlc_at_end(gll->head);
-insert_dlc_at_end(gll->head);
+insert_game_at_end(gll->head);
 //gll->head = delete_game_by_title(gll->head);
-gll->head->dlc_head = delete_dlc_by_title(gll->head);
-printDLC(gll->head);
+insert_dlc_at_end(gll->head);
+insert_dlc_at_end(gll->head);
 
+
+sort_games_by_rating(gll->head);
 printList(gll->head);
+printDLC(gll->head);
 
     return 0;
 }
