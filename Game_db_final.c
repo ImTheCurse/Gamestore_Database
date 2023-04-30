@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #define MAX_LEN 256
-#define DBG printf("Entered Here\n");
+
 
 
 
@@ -24,9 +24,39 @@ typedef struct dlc_node {
 typedef struct {
     GameNode* head;
 }GameLinkedList;
-
-
-
+//frees a single DLC in linked list.
+void freeDLC(DLCNode *head){
+    free(head->title);
+    free(head);
+}
+//frees a single game in linked list.
+void freeGame(GameNode *head){
+    if(head->dlc_head != NULL){
+        DLCNode *curr = head->dlc_head;
+        DLCNode *next = head->dlc_head;
+        while(next !=NULL){
+            curr = next;
+            next = next->next;
+            freeDLC(curr);
+        }
+    }
+    
+    GameNode *currGN = head;
+    free(currGN->title);
+    free(currGN->genre);
+    free(currGN);
+}
+//frees all the games is linked list
+void freeAllGames(GameNode *head){
+    GameNode *curr = head;
+    GameNode *next = head;
+    while(next != NULL){
+        curr = next;
+        next = next->next;
+        freeGame(curr);
+    }
+}
+//creates DLC node.
 DLCNode *CreateDLC(DLCNode *head){
     head = (DLCNode*)malloc(sizeof(DLCNode));
     char *buffer = (char *)malloc(MAX_LEN*sizeof(char));
@@ -40,7 +70,7 @@ DLCNode *CreateDLC(DLCNode *head){
     printf("DLC Title - ");
     fgets(buffer,MAX_LEN,stdin);
     head->title = (char*)malloc(strlen(buffer)+1);
-    if(head->title == NULL){free(head->title);return head;}
+    if(head->title == NULL){free(head->title);free(buffer);return head;}
     strcpy(head->title,buffer);
 
 
@@ -57,7 +87,7 @@ DLCNode *CreateDLC(DLCNode *head){
 
 }
 
-
+    //finds the title of a requested game.
     GameNode *findTitle(GameNode *head,char *title){
         while(head != NULL){
             if(strcmp(head->title,title)==0){
@@ -68,7 +98,7 @@ DLCNode *CreateDLC(DLCNode *head){
         
         return NULL;
     }
-
+//Inserts DLC at end.
 DLCNode* insert_dlc_at_end(GameNode *head){
 
     char *buffer = (char*)malloc(MAX_LEN*sizeof(char));
@@ -83,7 +113,8 @@ DLCNode* insert_dlc_at_end(GameNode *head){
     
     
     if(titleHead == NULL){
-        printf("Title dosen't exist");
+        printf("Title dosen't exist\n");
+        free(buffer);
         return NULL;
     }
     
@@ -96,6 +127,7 @@ DLCNode* insert_dlc_at_end(GameNode *head){
         prev = CreateDLC(titleHead->dlc_head);
         curr = prev->next;
         titleHead->dlc_head = prev;
+        free(buffer);
         return titleHead->dlc_head;
         
     }
@@ -109,6 +141,7 @@ DLCNode* insert_dlc_at_end(GameNode *head){
     DLCNode *newNode = CreateDLC(curr);
     newNode->next = prev->next;
     prev->next = newNode;
+    free(buffer);
 
     return titleHead->dlc_head;
 
@@ -139,14 +172,14 @@ void printDLC(GameNode *head){
         }
         curr = curr->next;
     }
-    printf("No DLC's found.");
+    printf("No DLC's found.\n");
     free(titleName);
 }
 
-
+//creates and add new game node.
 GameNode* GameAdd(GameNode *pos){
     
-    pos = (GameNode*)malloc(sizeof(GameNode));//TODO FREE
+    pos = (GameNode*)malloc(sizeof(GameNode));
     if(pos == NULL){
         free(pos);
     }
@@ -243,7 +276,7 @@ int LLSize(GameNode *head){
 }
 
 
-
+//delets game.
 GameNode *delete_game_by_title(GameNode *head){
     char *buffer = (char*)malloc(MAX_LEN*sizeof(char));
     if(buffer == NULL){
@@ -261,25 +294,23 @@ GameNode *delete_game_by_title(GameNode *head){
     //if the game is at the head, jump to the next and free the memory of the game and dlc.
     if(strcmp(head->title,buffer) == 0){
         head = head->next;
-        free(curr);
+        freeGame(curr);
         free(buffer);
-        if(curr->dlc_head != NULL){
-            free(curr->dlc_head);
-        }
+        
         return head;
     }
     //iterate over until you reach NULL(if you reach NULL then the title wasn't found).
     while(curr != NULL){
         if(strcmp(curr->title,buffer) == 0){
             prev->next = curr->next;
-            free(curr);
+            freeGame(curr);
             free(buffer);
             return head;
         }
         prev = curr;
         curr = curr->next;
     }
-    printf("not found %s",buffer);
+    printf("not found %s\n",buffer);
     free(buffer);
     return head;
 
@@ -296,6 +327,7 @@ DLCNode *findDLCTitle(GameNode *head){
     GameNode *curr = findTitle(head,buffer);
     if(curr == NULL){
        printf("No title found.\n");
+       free(buffer);
        return head->dlc_head;
     }
 
@@ -311,7 +343,7 @@ DLCNode *findDLCTitle(GameNode *head){
         curr->dlc_head = curr->dlc_head->next;
     }
    
-    printf("No DLC found.\n");
+    
     free(buffer);
     return NULL;
 }
@@ -330,7 +362,7 @@ DLCNode *delete_dlc_by_title(GameNode *head){
     //if the dlc we want to remove at the head then jump to the next one.
     if(strcmp(head1->title,curr->title) == 0){
         head1 = head1->next;
-        free(curr);
+        freeDLC(curr);
         return head1;
     }
 
@@ -339,7 +371,7 @@ DLCNode *delete_dlc_by_title(GameNode *head){
         
         if(strcmp(check->title,curr->title)==0){
             prev->next = curr->next;
-            free(curr);
+            freeDLC(curr);
             return head1;
         }
         prev = check;
@@ -445,7 +477,7 @@ while(1){
             sort_games_by_rating(gll->head);
             break;
         case 5:
-            insert_dlc_at_end(gll->head);
+            gll->head->dlc_head = insert_dlc_at_end(gll->head);
             break;
         case 6:
             gll->head->dlc_head = delete_dlc_by_title(gll->head);
@@ -454,8 +486,12 @@ while(1){
             printDLC(gll->head);
             break;
         case 8:
-            return 0;
             //free()
+            freeAllGames(gll->head);
+            free(gll);
+            
+            return 0;
+            
             break;
         
         default:
